@@ -1,0 +1,50 @@
+Insertion. 
+
+If there are empty slots in the in-page leaf
+node, we insert the entry into the sorted array for the node,
+by copying the array entries with larger key values to make
+room for the new entry. Otherwise, we need to split the leaf
+node into two. We first try to allocate new nodes in the
+page. If there is no space for splitting up the in-page tree,
+but the total number of entries in the page is still far fewer
+than the page maximum fan-out, we reorganize the in-page
+tree and insert the entry to avoid expensive page splits. But
+if the total number of entries is quite close to the maximum
+fan-out (fewer than an empty slot per in-page leaf node), we
+split the page by copying half of the in-page leaf nodes to a
+new page and then rebuilding the two in-page trees in their
+respective pages.
+
+
+For insertion, if there are empty slots in the
+leaf node, the new entry is simply inserted. Otherwise, the
+leaf node needs to be split into two. If the leaf page still has
+spare node space, the new leaf node is allocated within the
+same page. Otherwise, we split the leaf page by moving the
+second half of the leaf nodes to a new page and updating the
+corresponding child pointers in their parents. (To do this, we maintain in every leaf page a back pointer to the parent
+node of the first leaf node in the page, and we connect all leaf
+parent nodes through sibling links.) Having performed the
+page granularity split, we now perform the cache granularity
+split, by splitting the leaf node within its page.
+After a leaf node split, we need to insert an entry into its
+parent node. If the parent is full, it must first be split. For
+leaf parent nodes, the new node may be allocated from over- 
+ow pages. But if further splits up the tree are necessary, each new node must be allocated according to our aggressive placement scheme.
+
+Sibling node page linking (relationship implementation technique hint)
+In both jump-pointer arrays, sibling links within a page are implemented as page offsets and
+stored in the nodes, while sibling links across page boundaries are implemented as page IDs and stored in the page
+headers
+
+
+
+
+
+
+
+
+
+
+
+*just;   the page split cost is comparable to copying half of a page, which is the average data movement cost for inserting into an almost full page.
